@@ -17,8 +17,8 @@ RSpec.describe TrajectPlus::Extraction do
       end
     end
 
-    describe '#trim' do
-      let(:options) { { trim: true } }
+    describe '#strip' do
+      let(:options) { { strip: true } }
 
       context 'Where there is leading and trailing whitespace' do
         let(:data) { ['    This is a string with a lot of whitespace    '] }

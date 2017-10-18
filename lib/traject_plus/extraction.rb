@@ -19,40 +19,37 @@ module TrajectPlus
         options.inject(values) { |memo, (step, params)| public_send(step, memo, params) }
       end
 
-      def split(values, splitter)
-        values.flat_map do |v|
-          v.split(splitter)
+      ['split', 'concat', 'prepend', 'gsub', 'encode', 'insert'].each do |method|
+        define_method(method) do |values, *args|
+          values.flat_map do |v|
+            v.public_send(method, *args)
+          end
         end
       end
 
-      def trim(values, _)
-        values.map(&:strip)
-      end
-
-      def append(values, append_string)
-        values.flat_map do |v|
-          "#{v}#{append_string}"
+      ['strip', 'upcase', 'downcase', 'capitalize'].each do |method|
+        define_method(method) do |values, *args|
+          values.map(&(method.to_sym))
         end
       end
 
-      def replace(values, options)
+      def match(values, match, index)
         values.flat_map do |v|
-          v.gsub(options[0], options[1])
+          v.match(match) do |m|
+            m[index]
+          end
         end
       end
 
-      def insert(values, insert_string)
+      def format(values, insert_string)
         values.flat_map do |v|
-          insert_string.gsub('%s', v)
+          insert_string % v
         end
       end
 
       def translation_map(values, maps)
         translation_map = Traject::TranslationMap.new(*Array(maps))
-        # without overwriting (further) translation map, could add
-        # fuzzy match method here after pulling array out of TM
-        values = Array(values).map(&:downcase)
-        translation_map.translate_array values
+        translation_map.translate_array Array(values)
       end
 
       def default(values, default_value)
