@@ -48,5 +48,21 @@ RSpec.describe TrajectPlus::Extraction do
         expect(pipeline.transform(['audio'])).to eq ['sound']
       end
     end
+
+    describe 'class-based transform' do
+      let(:reversing_class) do
+        Class.new do
+          def self.call(value, *args)
+            value.reverse
+          end
+        end
+      end
+
+      let(:options) { { reversing_class => true } }
+
+      it 'looks up a value from the translation map' do
+        expect(pipeline.transform(['123'])).to eq ['321']
+      end
+    end
   end
 end

@@ -16,7 +16,13 @@ module TrajectPlus
       end
 
       def transform(values)
-        options.inject(values) { |memo, (step, params)| public_send(step, memo, params) }
+        options.inject(values) do |memo, (step, params)|
+          if step.respond_to? :call
+            memo.flat_map { |v| step.call(v, params) }
+          else
+            public_send(step, memo, params)
+          end
+        end
       end
 
       ['split', 'concat', 'prepend', 'gsub', 'encode', 'insert'].each do |method|
