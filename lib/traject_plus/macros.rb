@@ -49,5 +49,26 @@ module TrajectPlus
         Array(context.output_hash[field])
       end
     end
+
+    # apply the same mapping to multiple fields
+    def to_fields(fields, mapping_method)
+      fields.each { |field| to_field field, mapping_method }
+    end
+
+    def to_field(field_name, aLambda = nil, extract: nil, transform: nil, **namedArgs, &block)
+      @index_steps << TrajectPlus::Indexer::ToFieldStep.new(field_name, extract || aLambda, transform || block, Traject::Util.extract_caller_location(caller.first), **namedArgs)
+    end
+
+    def compose(fieldname = nil, aLambda = nil, extract: nil, transform: nil, &block)
+      if fieldname.is_a? Proc
+        aLambda ||= fieldname
+        fieldname = nil
+      end
+
+      indexer = self.class.new(settings)
+      indexer.instance_eval(&block)
+
+      @index_steps << TrajectPlus::Indexer::ComposeStep.new(fieldname, extract || aLambda, transform, Traject::Util.extract_caller_location(caller.first), indexer)
+    end
   end
 end

@@ -40,6 +40,43 @@ extract_fgdc('/*/idinfo/citation/citeinfo/geoform')
 * match
 * format
 * translation_map
+* `accumulate` : Streamlines creation of lambdas that need no additional parsing or filtering
+
+```ruby
+to_field 'x', accumulate { |record, context| record.values }
+```
+
+* `copy` : Copies values from one output field to another
+
+```ruby
+to_field 'x', copy('y')
+```
+
+* `compose` : easy create sub-transformations
+
+```ruby
+compose do
+  to_field 'x', accumulate { |record, context| record.x }
+end
+
+# => { 'x' => [1, 2, 3]}
+```
+
+```ruby
+compose('subfield') do
+  to_field 'x', accumulate { |record, context| record.x }
+end
+
+# => { 'subfield' => [{ 'x' => [1, 2, 3]} ]}
+```
+
+```ruby
+compose ->(record, accumulator, context) { record.subfield } do
+  to_field 'x', accumulate { |subfield, context| subfield.x }
+end
+# => { 'x' => [1, 2, 3]}
+```
+
 * other string methods: 'split', 'concat', 'prepend', 'gsub', 'encode', 'insert', 'strip', 'upcase', 'downcase', 'capitalize'
 
 These can be applied to any extract function:
