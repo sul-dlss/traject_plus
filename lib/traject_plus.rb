@@ -2,6 +2,8 @@ require 'traject_plus/version'
 require 'traject'
 
 module TrajectPlus
+  require 'traject_plus/indexer/step'
+
   require 'traject_plus/macros'
   require 'traject_plus/extraction'
 
