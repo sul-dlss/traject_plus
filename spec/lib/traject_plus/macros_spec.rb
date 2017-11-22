@@ -25,10 +25,11 @@ RSpec.describe TrajectPlus::Macros do
       indexer.instance_eval do
         compose 'field_name', ->(record, accumulator, _context) { accumulator << 'test' } do
           to_field 'composed', ->(record, accumulator, _context) { accumulator << record }
+          to_field 'second', literal('another')
         end
       end
 
-      expect(indexer.map_record(nil)).to include 'field_name' => [{ 'composed' => ['test'] }]
+      expect(indexer.map_record(nil)).to include 'field_name' => [{ 'composed' => ['test'], 'second' => ['another'] }]
     end
   end
 end
