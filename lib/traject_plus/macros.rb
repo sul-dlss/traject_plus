@@ -50,6 +50,13 @@ module TrajectPlus
       end
     end
 
+    def transform(options = {})
+      lambda do |record, accumulator, context|
+        results = TrajectPlus::Extraction.apply_extraction_options(accumulator, options)
+        accumulator.replace(results)
+      end
+    end
+
     # apply the same mapping to multiple fields
     def to_fields(fields, mapping_method)
       fields.each { |field| to_field field, mapping_method }

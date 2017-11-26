@@ -32,4 +32,14 @@ RSpec.describe TrajectPlus::Macros do
       expect(indexer.map_record(nil)).to include 'field_name' => [{ 'composed' => ['test'], 'second' => ['another'] }]
     end
   end
+
+  describe '#transform' do
+    it 'runs values through a common transform pipeline' do
+      indexer.instance_eval do
+        to_field 'some_field', extract: accumulate { |record, *_| record[:value] }, transform: transform(split: '/', prepend: '-', upcase: true)
+      end
+
+      expect(indexer.map_record(value: 'a/b/c')).to include 'some_field' => ['-A', '-B', '-C']
+    end
+  end
 end

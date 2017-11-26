@@ -77,12 +77,12 @@ end
 # => { 'x' => [1, 2, 3]}
 ```
 
-* other string methods: 'split', 'concat', 'prepend', 'gsub', 'encode', 'insert', 'strip', 'upcase', 'downcase', 'capitalize'
+* `transform`, supporting a variety of string methods: 'split', 'concat', 'prepend', 'gsub', 'encode', 'insert', 'strip', 'upcase', 'downcase', 'capitalize'
 
 These can be applied to any extract function:
 
 ```ruby
-to_field 'title', extract_xml('title', gsub: ['|', ' - '])
+to_field 'title', extract: extract_xml('title'), transform: transform(gsub: ['|', ' - '])
 ```
 
 ## Installation
