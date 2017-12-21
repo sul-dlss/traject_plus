@@ -16,19 +16,13 @@ module TrajectPlus
         false
       end
 
-      def execute(context)
-        accumulator = super
-
-        add_accumulator_to_context!(accumulator, context)
-      end
-
       def add_accumulator_to_context!(accumulator, context)
         self.class.add_accumulator_to_context!(self, field_name, accumulator, context)
       end
 
       def self.add_accumulator_to_context!(field, field_name, accumulator, context)
-        accumulator.compact! unless context.settings[Traject::Indexer::ALLOW_NIL_VALUES]
-        return if accumulator.empty? and not (context.settings[Traject::Indexer::ALLOW_EMPTY_FIELDS])
+        accumulator.compact! unless context.settings[ALLOW_NIL_VALUES]
+        return if accumulator.empty? and not (context.settings[ALLOW_EMPTY_FIELDS])
 
         if field.single?
           context.output_hash[field_name] = accumulator.first if accumulator.length > 0
@@ -36,7 +30,7 @@ module TrajectPlus
           context.output_hash[field_name] ||= []
 
           existing_accumulator = context.output_hash[field_name].concat(accumulator)
-          existing_accumulator.uniq! unless context.settings[Traject::Indexer::ALLOW_DUPLICATE_VALUES]
+          existing_accumulator.uniq! unless context.settings[ALLOW_DUPLICATE_VALUES]
         end
       end
     end
