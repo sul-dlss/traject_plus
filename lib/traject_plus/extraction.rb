@@ -37,7 +37,8 @@ module TrajectPlus
       ['split', 'concat', 'prepend', 'gsub', 'encode', 'insert'].each do |method|
         define_method(method) do |values, *args|
           values.flat_map do |v|
-            v.public_send(method, *args)
+            # Cannot prepend to frozen string; use #dup to effectively unfreeze
+            v.dup.public_send(method, *args)
           end
         end
       end
