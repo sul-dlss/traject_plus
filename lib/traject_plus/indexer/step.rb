@@ -55,7 +55,10 @@ module TrajectPlus
         end
 
         accumulator.map do |record|
-          result = indexer.map_record(record)
+          new_context = Traject::Indexer::Context.new(source_record: record, settings: indexer.settings)
+          new_context.clipboard[:parent] = context
+          indexer.map_to_context!(new_context)
+          result = new_context.output_hash
 
           if field_name
             self.class.add_accumulator_to_context! self, field_name, [result], context
