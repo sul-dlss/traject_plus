@@ -17,6 +17,15 @@ RSpec.describe TrajectPlus::Extraction do
       end
     end
 
+    describe '#gsub' do
+      let(:options) { { gsub: %w[a b] } }
+      let(:data) { ['aaa'] }
+
+      it 'Replaces the values' do
+        expect(pipeline.transform(data)).to eq ['bbb']
+      end
+    end
+
     describe '#strip' do
       let(:options) { { strip: true } }
 
