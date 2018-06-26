@@ -31,6 +31,21 @@ RSpec.describe TrajectPlus::Macros do
 
       expect(indexer.map_record(nil)).to include 'field_name' => [{ 'composed' => ['test'], 'second' => ['another'] }]
     end
+
+    it 'provides access to the original context through the clipboard' do
+      indexer.instance_eval do
+        each_record do |record, context|
+          context.clipboard[:value] = 'Yes!'
+        end
+
+        compose 'field_name', ->(record, accumulator, _context) { accumulator << 'test' } do
+          to_field 'parent_context_value', ->(_record, accumulator, context) { accumulator << context.clipboard[:parent].clipboard[:value] }
+        end
+      end
+
+      expect(indexer.map_record(nil)).to include 'field_name' => [{ 'parent_context_value' => ['Yes!']}]
+
+    end
   end
 
   describe '#transform' do
