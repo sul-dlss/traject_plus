@@ -35,7 +35,7 @@ module TrajectPlus
       # to_field 'x', encode: 'UTF-8' # 'abc' to 'abc'
       # to_field 'x', insert: [1, 'x'] # 'abc' to 'axbc'
       ['split', 'concat', 'prepend', 'gsub', 'encode', 'insert'].each do |method|
-        define_method(method) do |values, *args|
+        define_method(method) do |values, args|
           values.flat_map do |v|
             # Cannot prepend to frozen string; use #dup to effectively unfreeze
             v.dup.public_send(method, *args)
