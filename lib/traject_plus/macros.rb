@@ -66,7 +66,7 @@ module TrajectPlus
       @index_steps << TrajectPlus::Indexer::ToFieldStep.new(field_name, extract || aLambda, transform || block, Traject::Util.extract_caller_location(caller.first), **namedArgs)
     end
 
-    def compose(fieldname = nil, aLambda = nil, extract: nil, transform: nil, &block)
+    def compose(fieldname = nil, aLambda = nil, method: :merge, extract: nil, transform: nil, &block)
       if fieldname.is_a? Proc
         aLambda ||= fieldname
         fieldname = nil
@@ -75,7 +75,7 @@ module TrajectPlus
       indexer = self.class.new(settings)
       indexer.instance_eval(&block)
 
-      @index_steps << TrajectPlus::Indexer::ComposeStep.new(fieldname, extract || aLambda, transform, Traject::Util.extract_caller_location(caller.first), indexer)
+      @index_steps << TrajectPlus::Indexer::ComposeStep.new(fieldname, extract || aLambda, transform, Traject::Util.extract_caller_location(caller.first), indexer, method: method)
     end
   end
 end
