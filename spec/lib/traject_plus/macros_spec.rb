@@ -46,6 +46,17 @@ RSpec.describe TrajectPlus::Macros do
       expect(indexer.map_record(nil)).to include 'field_name' => [{ 'parent_context_value' => ['Yes!']}]
 
     end
+
+    it 'can return the composed values as an array' do
+      indexer.instance_eval do
+        compose 'field_name', ->(record, accumulator, _context) { accumulator << 1; accumulator << 2 }, method: :each do
+          to_field 'key', ->(record, accumulator, _context) { accumulator << record }
+        end
+      end
+
+      expect(indexer.map_record(nil)).to include 'field_name' => [{ 'key' => [1] }, { 'key' => [2] }]
+
+    end
   end
 
   describe '#transform' do

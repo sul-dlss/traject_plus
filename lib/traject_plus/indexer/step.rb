@@ -38,12 +38,13 @@ module TrajectPlus
     class ComposeStep < ToFieldStep
       attr_reader :indexer
 
-      def initialize(fieldname, lambda, block, source_location, indexer)
+      def initialize(fieldname, lambda, block, source_location, indexer, method: :merge)
         @indexer             = indexer
         self.field_name      = fieldname
         self.lambda          = lambda
         self.block           = block
         self.source_location = source_location
+        @method              = method
       end
 
       def execute(context)
@@ -54,19 +55,25 @@ module TrajectPlus
           accumulator << context.source_record
         end
 
-        accumulator.map do |record|
+        results = accumulator.map do |record|
           new_context = Traject::Indexer::Context.new(source_record: record, settings: indexer.settings)
           new_context.clipboard[:parent] = context
           indexer.map_to_context!(new_context)
           result = new_context.output_hash
 
-          if field_name
+          if @method == :merge && field_name
             self.class.add_accumulator_to_context! self, field_name, [result], context
+          elsif @method == :each && field_name
+            result
           else
             result.each do |k, v|
               self.class.add_accumulator_to_context! self, k, Array(v), context
             end
           end
+        end
+
+        if @method == :each && field_name
+          self.class.add_accumulator_to_context! self, field_name, results, context
         end
       end
     end
