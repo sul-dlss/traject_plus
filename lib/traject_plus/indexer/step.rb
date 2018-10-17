@@ -1,8 +1,8 @@
 module TrajectPlus
   module Indexer
     class ToFieldStep < Traject::Indexer::ToFieldStep
-      def initialize(fieldname, lambda, block, source_location, single: false)
-        super(fieldname, lambda, block, source_location)
+      def initialize(fieldname, procs, block, source_location, single: false)
+        super(fieldname, procs, block, source_location)
 
         @single = single
       end
@@ -24,13 +24,16 @@ module TrajectPlus
         accumulator.compact! unless context.settings[ALLOW_NIL_VALUES]
         return if accumulator.empty? and not (context.settings[ALLOW_EMPTY_FIELDS])
 
-        if field.single?
-          context.output_hash[field_name] = accumulator.first if accumulator.length > 0
-        else
-          context.output_hash[field_name] ||= []
+        # field_name can actually be an array of field names
+        Array(field_name).each do |a_field_name|
+          if field.single?
+            context.output_hash[a_field_name] = accumulator.first if accumulator.length > 0
+          else
+            context.output_hash[a_field_name] ||= []
 
-          existing_accumulator = context.output_hash[field_name].concat(accumulator)
-          existing_accumulator.uniq! unless context.settings[ALLOW_DUPLICATE_VALUES]
+            existing_accumulator = context.output_hash[a_field_name].concat(accumulator)
+            existing_accumulator.uniq! unless context.settings[ALLOW_DUPLICATE_VALUES]
+          end
         end
       end
     end
@@ -38,18 +41,20 @@ module TrajectPlus
     class ComposeStep < ToFieldStep
       attr_reader :indexer
 
-      def initialize(fieldname, lambda, block, source_location, indexer)
+      def initialize(fieldname, procs, block, source_location, indexer)
         @indexer             = indexer
-        self.field_name      = fieldname
-        self.lambda          = lambda
-        self.block           = block
-        self.source_location = source_location
+        @field_name          = fieldname
+        @procs               = procs
+        @block               = block
+        @source_location     = source_location
       end
 
       def execute(context)
         accumulator = []
-        if lambda
-          lambda.call(context.source_record, accumulator, context)
+        source_record = context.source_record
+
+        if procs
+          procs.call(context.source_record, accumulator, context)
         else
           accumulator << context.source_record
         end
