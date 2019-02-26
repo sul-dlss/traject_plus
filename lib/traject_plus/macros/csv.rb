@@ -4,6 +4,7 @@ module TrajectPlus
   module Macros
     # Macros for extracting values from CSV rows
     module Csv
+      # Retrieve the value of the column with the given header or index.
       # @param header_or_index [String] the field header or index to accumulate
       def column(header_or_index, options = {})
         lambda do |row, accumulator, _context|
