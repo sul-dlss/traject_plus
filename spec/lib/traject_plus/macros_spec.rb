@@ -57,4 +57,22 @@ RSpec.describe TrajectPlus::Macros do
       expect(indexer.map_record(value: 'a/b/c')).to include 'some_field' => ['-A', '-B', '-C']
     end
   end
+
+  describe '#to_field' do
+    it 'accepts extract and transform fields' do
+      indexer.instance_eval do
+        to_field 'some_field', extract: accumulate { |record, *_| record[:value] }, transform: transform(split: '/', prepend: '-', upcase: true)
+      end
+
+      expect(indexer.map_record(value: 'a/b/c')).to include 'some_field' => ['-A', '-B', '-C']
+    end
+
+    it 'accepts a list of procs' do
+      indexer.instance_eval do
+        to_field 'some_field', accumulate { |record, *_| record[:value] }, transform(split: '/', prepend: '-', upcase: true), transform(append: '*')
+      end
+
+      expect(indexer.map_record(value: 'a/b/c')).to include 'some_field' => ['-A*', '-B*', '-C*']
+    end
+  end
 end

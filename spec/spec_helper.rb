@@ -1,5 +1,6 @@
 require "bundler/setup"
 require "traject_plus"
+require 'byebug'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
