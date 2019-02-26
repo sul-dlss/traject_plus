@@ -1,4 +1,5 @@
 # TrajectPlus
+[![Gem Version](https://badge.fury.io/rb/traject_plus.png)](http://badge.fury.io/rb/traject_plus) 
 
 TrajectPlus is a number of useful additions to [Traject](https://github.com/traject/traject)
 
