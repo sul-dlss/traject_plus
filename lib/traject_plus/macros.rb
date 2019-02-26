@@ -62,8 +62,9 @@ module TrajectPlus
       fields.each { |field| to_field field, mapping_method }
     end
 
-    def to_field(field_name, aLambda = nil, extract: nil, transform: nil, **namedArgs, &block)
-      @index_steps << TrajectPlus::Indexer::ToFieldStep.new(field_name, extract || aLambda, transform || block, Traject::Util.extract_caller_location(caller.first), **namedArgs)
+    def to_field(field_name, *procs, extract: nil, transform: nil, **namedArgs, &block)
+      procs =  [extract, transform] if procs.empty?
+      @index_steps << TrajectPlus::Indexer::ToFieldStep.new(field_name, procs, block, Traject::Util.extract_caller_location(caller.first), **namedArgs)
     end
 
     def compose(fieldname = nil, aLambda = nil, extract: nil, transform: nil, &block)
