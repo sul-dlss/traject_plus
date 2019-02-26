@@ -1,40 +1,14 @@
 module TrajectPlus
   module Indexer
     class ToFieldStep < Traject::Indexer::ToFieldStep
+      include Traject::Macros::Transformation
+
       def initialize(fieldname, procs, block, source_location, single: false)
-        super(fieldname, procs, block, source_location)
-
-        @single = single
-      end
-
-      def single?
-        !!@single
-      end
-
-      # disable to_field_step? so we can implement our own version of add_accumulator_to_context
-      def to_field_step?
-        false
-      end
-
-      def add_accumulator_to_context!(accumulator, context)
-        self.class.add_accumulator_to_context!(self, field_name, accumulator, context)
-      end
-
-      def self.add_accumulator_to_context!(field, field_name, accumulator, context)
-        accumulator.compact! unless context.settings[ALLOW_NIL_VALUES]
-        return if accumulator.empty? and not (context.settings[ALLOW_EMPTY_FIELDS])
-
-        # field_name can actually be an array of field names
-        Array(field_name).each do |a_field_name|
-          if field.single?
-            context.output_hash[a_field_name] = accumulator.first if accumulator.length > 0
-          else
-            context.output_hash[a_field_name] ||= []
-
-            existing_accumulator = context.output_hash[a_field_name].concat(accumulator)
-            existing_accumulator.uniq! unless context.settings[ALLOW_DUPLICATE_VALUES]
-          end
+        if single
+          procs += [first_only]
+          Deprecation.warn(self, "passing single to to_field is deprecated. use 'first_only' lambda instead")
         end
+        super(fieldname, procs, block, source_location)
       end
     end
 
@@ -47,6 +21,24 @@ module TrajectPlus
         @procs               = procs
         @block               = block
         @source_location     = source_location
+      end
+
+      def self.add_accumulator_to_context!(field, field_name, accumulator, context)
+        accumulator.compact! unless context.settings[ALLOW_NIL_VALUES]
+        return if accumulator.empty? and not (context.settings[ALLOW_EMPTY_FIELDS])
+
+        # field_name can actually be an array of field names
+        Array(field_name).each do |a_field_name|
+          context.output_hash[a_field_name] ||= []
+
+          existing_accumulator = context.output_hash[a_field_name].concat(accumulator)
+          existing_accumulator.uniq! unless context.settings[ALLOW_DUPLICATE_VALUES]
+        end
+      end
+
+      # disable to_field_step? so we can implement our own version of add_accumulator_to_context
+      def to_field_step?
+        false
       end
 
       def execute(context)
@@ -72,6 +64,11 @@ module TrajectPlus
               self.class.add_accumulator_to_context! self, k, Array(v), context
             end
           end
+        end
+
+        # This overrides the superclass so that we can call the class method instead
+        def add_accumulator_to_context!(accumulator, context)
+          self.class.add_accumulator_to_context!(self, field_name, accumulator, context)
         end
       end
     end
