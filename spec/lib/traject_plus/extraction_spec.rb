@@ -17,6 +17,16 @@ RSpec.describe TrajectPlus::Extraction do
       end
     end
 
+    describe '#replace' do
+      let(:options) { { replace: %w[a b] } }
+      let(:data) { ['aaa'] }
+
+      it 'Replaces the values' do
+        expect(Deprecation).to receive(:warn)
+        expect(pipeline.transform(data)).to eq ['bbb']
+      end
+    end
+
     describe '#gsub' do
       let(:options) { { gsub: %w[a b] } }
       let(:data) { ['aaa'] }
@@ -35,6 +45,28 @@ RSpec.describe TrajectPlus::Extraction do
         it 'Removes the leading and trailing whitespace' do
           expect(pipeline.transform(data)).to eq ['This is a string with a lot of whitespace']
         end
+      end
+    end
+
+    describe '#trim' do
+      let(:options) { { trim: true } }
+
+      context 'Where there is leading and trailing whitespace' do
+        let(:data) { ['    This is a string with a lot of whitespace    '] }
+
+        it 'Removes the leading and trailing whitespace' do
+          expect(Deprecation).to receive(:warn)
+          expect(pipeline.transform(data)).to eq ['This is a string with a lot of whitespace']
+        end
+      end
+    end
+
+    describe '#append' do
+      let(:options) { { append: 'bar' } }
+      let(:data) { ['foo'] }
+
+      it 'appends the value' do
+        expect(pipeline.transform(data)).to eq ['foobar']
       end
     end
 
