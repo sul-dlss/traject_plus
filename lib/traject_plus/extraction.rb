@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'active_support/core_ext/object/blank'
+require 'deprecation'
+
 module TrajectPlus
   module Extraction
     def self.apply_extraction_options(result, options = {})
@@ -9,6 +11,8 @@ module TrajectPlus
 
     # Pipeline for transforming extracted values into normalized values
     class TransformPipeline
+      extend Deprecation
+
       attr_reader :options
 
       def initialize(options)
@@ -50,6 +54,13 @@ module TrajectPlus
       ['strip', 'upcase', 'downcase', 'capitalize'].each do |method|
         define_method(method) do |values, *args|
           values.map(&(method.to_sym))
+        end
+      end
+
+      # to_field 'x', append: '321' # 'abc' to 'abc321'
+      def append(values, append_string)
+        values.flat_map do |v|
+          "#{v}#{append_string}"
         end
       end
 
@@ -112,6 +123,11 @@ module TrajectPlus
           default_value
         end
       end
+
+      alias replace gsub
+      deprecation_deprecate replace: "use gsub instead"
+      alias trim strip
+      deprecation_deprecate trim: "use strip instead"
     end
   end
 end
