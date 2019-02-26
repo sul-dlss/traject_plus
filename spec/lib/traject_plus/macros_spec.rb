@@ -59,20 +59,34 @@ RSpec.describe TrajectPlus::Macros do
   end
 
   describe '#to_field' do
-    it 'accepts extract and transform fields' do
-      indexer.instance_eval do
-        to_field 'some_field', extract: accumulate { |record, *_| record[:value] }, transform: transform(split: '/', prepend: '-', upcase: true)
-      end
+    context 'with extract and transform fields' do
+      it 'runs both extract and transform' do
+        indexer.instance_eval do
+          to_field 'some_field', extract: accumulate { |record, *_| record[:value] }, transform: transform(split: '/', prepend: '-', upcase: true)
+        end
 
-      expect(indexer.map_record(value: 'a/b/c')).to include 'some_field' => ['-A', '-B', '-C']
+        expect(indexer.map_record(value: 'a/b/c')).to include 'some_field' => ['-A', '-B', '-C']
+      end
     end
 
-    it 'accepts a list of procs' do
-      indexer.instance_eval do
-        to_field 'some_field', accumulate { |record, *_| record[:value] }, transform(split: '/', prepend: '-', upcase: true), transform(append: '*')
-      end
+    context 'with a list of procs' do
+      it 'runs all procs' do
+        indexer.instance_eval do
+          to_field 'some_field', accumulate { |record, *_| record[:value] }, transform(split: '/', prepend: '-', upcase: true), transform(append: '*')
+        end
 
-      expect(indexer.map_record(value: 'a/b/c')).to include 'some_field' => ['-A*', '-B*', '-C*']
+        expect(indexer.map_record(value: 'a/b/c')).to include 'some_field' => ['-A*', '-B*', '-C*']
+      end
+    end
+
+    context 'with single: true' do
+      it 'casts to a scalar' do
+        indexer.instance_eval do
+          to_field 'some_field', accumulate { |record, *_| record[:value] }, single: true
+        end
+
+        expect(indexer.map_record(value: 'a/b/c')).to include 'some_field' => 'a/b/c'
+      end
     end
   end
 end
