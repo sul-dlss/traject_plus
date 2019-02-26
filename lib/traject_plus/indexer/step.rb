@@ -1,6 +1,8 @@
 module TrajectPlus
   module Indexer
     class ToFieldStep < Traject::Indexer::ToFieldStep
+      # @param single [Bool] if true, this outputs a scalar value (rather than an Array)
+      #                      by default Traject only outputs arrays.
       def initialize(fieldname, procs, block, source_location, single: false)
         super(fieldname, procs, block, source_location)
 
