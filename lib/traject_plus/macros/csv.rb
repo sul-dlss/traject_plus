@@ -10,6 +10,9 @@ module TrajectPlus
         lambda do |row, accumulator, _context|
           return if row[header_or_index].to_s.empty?
           result = Array(row[header_or_index].to_s)
+          unless options.empty?
+            Deprecation.warn(self, "passing options to column is deprecated and will be removed in the next major release. Use the Traject 3 pipeline instead")
+          end
           result = TrajectPlus::Extraction.apply_extraction_options(result, options)
           accumulator.concat(result)
         end

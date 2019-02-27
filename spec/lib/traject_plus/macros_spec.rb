@@ -50,6 +50,7 @@ RSpec.describe TrajectPlus::Macros do
 
   describe '#transform' do
     it 'runs values through a common transform pipeline' do
+      expect(Deprecation).to receive(:warn).twice
       indexer.instance_eval do
         to_field 'some_field', extract: accumulate { |record, *_| record[:value] }, transform: transform(split: '/', prepend: '-', upcase: true)
       end
@@ -61,6 +62,7 @@ RSpec.describe TrajectPlus::Macros do
   describe '#to_field' do
     context 'with extract and transform fields' do
       it 'runs both extract and transform' do
+        expect(Deprecation).to receive(:warn).twice
         indexer.instance_eval do
           to_field 'some_field', extract: accumulate { |record, *_| record[:value] }, transform: transform(split: '/', prepend: '-', upcase: true)
         end
@@ -72,7 +74,7 @@ RSpec.describe TrajectPlus::Macros do
     context 'with a list of procs' do
       it 'runs all procs' do
         indexer.instance_eval do
-          to_field 'some_field', accumulate { |record, *_| record[:value] }, transform(split: '/', prepend: '-', upcase: true), transform(append: '*')
+          to_field 'some_field', accumulate { |record, *_| record[:value] }, split('/'), prepend('-'), transform(&:upcase), append('*')
         end
 
         expect(indexer.map_record(value: 'a/b/c')).to include 'some_field' => ['-A*', '-B*', '-C*']
