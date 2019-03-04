@@ -4,6 +4,7 @@ require 'active_support/core_ext/object/blank'
 require 'deprecation'
 
 module TrajectPlus
+  # @deprecated because Traject 3 can do this for us.
   module Extraction
     def self.apply_extraction_options(result, options = {})
       TransformPipeline.new(options).transform(result)

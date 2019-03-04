@@ -1,6 +1,11 @@
 # frozen_string_literal: true
+
+require 'deprecation'
+
 module TrajectPlus
   module Macros
+    extend Deprecation
+
     # construct a structured hash using values extracted using traject
     def transform_values(context, hash)
       hash.transform_values do |lambdas|
@@ -51,10 +56,9 @@ module TrajectPlus
     end
 
     def transform(options = {})
-      lambda do |record, accumulator, context|
-        results = TrajectPlus::Extraction.apply_extraction_options(accumulator, options)
-        accumulator.replace(results)
-      end
+      return deprecated_transform(options) unless block_given?
+
+      super() # These empty parens are meaningful, otherwise it'll pass options.
     end
 
     # apply the same mapping to multiple fields
@@ -63,6 +67,9 @@ module TrajectPlus
     end
 
     def to_field(field_name, *procs, extract: nil, transform: nil, **namedArgs, &block)
+      if transform || extract
+        Deprecation.warn(self, "Passing extract or transform arguments to to_field is deprecated. Use the Traject 3 pipeline instead.")
+      end
       procs =  [extract, transform] if procs.empty?
       @index_steps << TrajectPlus::Indexer::ToFieldStep.new(field_name, procs, block, Traject::Util.extract_caller_location(caller.first), **namedArgs)
     end
@@ -77,6 +84,16 @@ module TrajectPlus
       indexer.instance_eval(&block)
 
       @index_steps << TrajectPlus::Indexer::ComposeStep.new(fieldname, extract || aLambda, transform, Traject::Util.extract_caller_location(caller.first), indexer)
+    end
+
+    private
+
+    def deprecated_transform(options)
+      Deprecation.warn(self, "transform is deprecated and will be removed in the next major release. Use the Traject 3 pipeline instead")
+      lambda do |record, accumulator, context|
+        results = TrajectPlus::Extraction.apply_extraction_options(accumulator, options)
+        accumulator.replace(results)
+      end
     end
   end
 end
