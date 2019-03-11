@@ -10,6 +10,25 @@ RSpec.describe TrajectPlus::Macros do
     end
   end
 
+  describe '#transform_values' do
+    let(:doc) { Nokogiri::XML('<xml><foo> bar </foo></xml>') }
+    context 'with lambdas with 2 and 3 arity' do
+      it 'runs both' do
+        indexer.extend TrajectPlus::Macros::Xml
+        indexer.instance_eval do
+          to_field 'some_field' do |_record, accumulator, context|
+            accumulator << transform_values(
+              context,
+              'wr_id' => [extract_xml('//foo', {}), strip]
+            )
+          end
+        end
+
+        expect(indexer.map_record(doc)).to eq('some_field' => [{ 'wr_id' => ['bar'] }])
+      end
+    end
+  end
+
   describe '#compose' do
     it 'adds composed fields to the original record' do
       indexer.instance_eval do

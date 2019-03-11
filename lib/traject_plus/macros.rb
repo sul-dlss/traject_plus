@@ -10,8 +10,12 @@ module TrajectPlus
     def transform_values(context, hash)
       hash.transform_values do |lambdas|
         accumulator = []
-        Array(lambdas).each do |lambda|
-          lambda.call(context.source_record, accumulator, context)
+        Array(lambdas).each do |aProc|
+          if aProc.arity == 2
+            aProc.call(context.source_record, accumulator)
+          else
+            aProc.call(context.source_record, accumulator, context)
+          end
         end
         accumulator
       end
