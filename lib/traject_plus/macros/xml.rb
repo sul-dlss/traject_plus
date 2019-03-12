@@ -8,6 +8,8 @@ module TrajectPlus
       # @param namespaces [Hash<String,String>] The namespaces for the xpath query
       # @param options [Hash] other options, may include :trim
       def extract_xml(xpath, namespaces, options = {})
+        Deprecation.warn(self, "extract_xml is deprecated and will be removed in the next major release. Use the Traject 3 pipeline instead")
+
         lambda do |xml, accumulator, _context|
           result = xml.xpath(xpath, namespaces).map(&:text)
           unless options.empty?
