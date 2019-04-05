@@ -14,12 +14,12 @@ RSpec.describe TrajectPlus::Macros do
     let(:doc) { Nokogiri::XML('<xml><foo> bar </foo></xml>') }
     context 'with lambdas with 2 and 3 arity' do
       it 'runs both' do
-        indexer.extend TrajectPlus::Macros::Xml
+        indexer.extend Traject::Macros::NokogiriMacros
         indexer.instance_eval do
           to_field 'some_field' do |_record, accumulator, context|
             accumulator << transform_values(
               context,
-              'wr_id' => [extract_xml('//foo', {}), strip]
+              'wr_id' => [extract_xpath('//foo'), strip]
             )
           end
         end

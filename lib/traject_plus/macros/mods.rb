@@ -9,9 +9,13 @@ module TrajectPlus
              dc: 'http://purl.org/dc/elements/1.1/',
              xlink: 'http://www.w3.org/1999/xlink' }.freeze
 
+      def self.extended(mod)
+        mod.extended Traject::Macros::NokogiriMacros
+      end
+
       # @param xpath [String] the xpath query expression
-      def extract_mods(xpath, options = {})
-        extract_xml(xpath, NS, options)
+      def extract_mods(xpath)
+        extract_xpath(xpath, NS)
       end
     end
   end
