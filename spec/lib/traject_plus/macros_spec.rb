@@ -63,7 +63,16 @@ RSpec.describe TrajectPlus::Macros do
       end
 
       expect(indexer.map_record(nil)).to include 'field_name' => [{ 'parent_context_value' => ['Yes!']}]
+    end
 
+    it 'provides position and position_in_input information in the context' do
+      indexer.instance_eval do
+        compose 'field_name', ->(record, accumulator, _context) { accumulator << 'test' << 'test2' } do
+          to_field 'position', ->(_record, accumulator, context) { accumulator << context.position }
+        end
+      end
+
+      expect(indexer.map_record(nil)).to include 'field_name' => [{ 'position' => [0] }, { 'position' => [1] }]
     end
   end
 

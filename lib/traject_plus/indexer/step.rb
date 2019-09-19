@@ -61,8 +61,13 @@ module TrajectPlus
           accumulator << context.source_record
         end
 
-        accumulator.map do |record|
-          new_context = Traject::Indexer::Context.new(source_record: record, settings: indexer.settings)
+        accumulator.each_with_index.map do |record, index|
+          new_context = Traject::Indexer::Context.new(
+            source_record: record,
+            settings: indexer.settings,
+            position: index,
+            position_in_input: index
+          )
           new_context.clipboard[:parent] = context
           indexer.map_to_context!(new_context)
           result = new_context.output_hash
