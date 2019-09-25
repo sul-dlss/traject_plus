@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'spec_helper'
 
 RSpec.describe TrajectPlus::Macros do
@@ -11,20 +12,32 @@ RSpec.describe TrajectPlus::Macros do
   end
 
   describe '#transform_values' do
-    let(:doc) { Nokogiri::XML('<xml><foo> bar </foo></xml>') }
+    let(:doc) do
+      Nokogiri::XML(
+        <<-XML
+          <?xml version="1.0" encoding="UTF-8"?>
+          <mods xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.loc.gov/mods/v3" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-3.xsd" version="3.3">
+            <genre>bar</genre>
+          </mods>
+        XML
+      )
+    end
+
     context 'with lambdas with 2 and 3 arity' do
       it 'runs both' do
-        indexer.extend Traject::Macros::NokogiriMacros
+        indexer.extend TrajectPlus::Macros::Mods
         indexer.instance_eval do
           to_field 'some_field' do |_record, accumulator, context|
             accumulator << transform_values(
               context,
-              'wr_id' => [extract_xpath('//foo'), strip]
+              'wr_id' => [extract_xpath('//mods:genre', ns: TrajectPlus::Macros::Mods::NS), strip]
             )
           end
+          to_field 'other_field', extract_mods('/*/mods:genre')
         end
 
-        expect(indexer.map_record(doc)).to eq('some_field' => [{ 'wr_id' => ['bar'] }])
+        expect(indexer.map_record(doc)).to eq('some_field' => [{ 'wr_id' => ['bar'] }],
+                                              'other_field' => ['bar'])
       end
     end
   end
