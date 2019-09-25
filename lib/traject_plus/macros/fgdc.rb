@@ -6,9 +6,7 @@ module TrajectPlus
     module FGDC
       NS = { fgdc: 'http://www.fgdc.gov/metadata/fgdc-std-001-1998.dtd' }.freeze
 
-      def self.extended(mod)
-        mod.extended Traject::Macros::NokogiriMacros
-      end
+      include Traject::Macros::NokogiriMacros
 
       # @param xpath [String] the xpath query expression
       def extract_fgdc(xpath)

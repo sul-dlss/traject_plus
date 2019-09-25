@@ -5,9 +5,7 @@ module TrajectPlus
     module Tei
       NS = { tei: 'http://www.tei-c.org/ns/1.0' }.freeze
 
-      def self.extended(mod)
-        mod.extended Traject::Macros::NokogiriMacros
-      end
+      include Traject::Macros::NokogiriMacros
 
       # @param xpath [String] the xpath query expression
       def extract_tei(xpath)

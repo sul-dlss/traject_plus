@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'spec_helper'
 
 RSpec.describe TrajectPlus::Macros do
@@ -29,12 +30,14 @@ RSpec.describe TrajectPlus::Macros do
           to_field 'some_field' do |_record, accumulator, context|
             accumulator << transform_values(
               context,
-              'wr_id' => [extract_xpath('//genre'), strip]
+              'wr_id' => [extract_xpath('//mods:genre', ns: TrajectPlus::Macros::Mods::NS), strip]
             )
           end
+          to_field 'other_field', extract_mods('/*/mods:genre')
         end
 
-        expect(indexer.map_record(doc)).to eq('some_field' => [{ 'wr_id' => ['bar'] }])
+        expect(indexer.map_record(doc)).to eq('some_field' => [{ 'wr_id' => ['bar'] }],
+                                              'other_field' => ['bar'])
       end
     end
   end
