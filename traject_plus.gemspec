@@ -24,6 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'jsonpath'
   spec.add_dependency 'traject', '~> 3.0'
   spec.add_dependency 'deprecation'
+  spec.add_dependency 'csv'
 
   spec.add_development_dependency "bundler", '>= 2.0'
   spec.add_development_dependency "rake", "~> 13.0"
